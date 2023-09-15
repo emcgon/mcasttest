@@ -64,7 +64,7 @@ try:
       (data, sender) = sock.recvfrom(10240)
       if (sender not in sources):
           sources.append(sender)
-          print(f"Found new source: {sender[0]}:{sender[1]} ({len(sources)} unique sources so far)")
+          print(f"\nFound new source: {sender[0]}:{sender[1]} ({len(sources)} unique sources so far)")
       n = len(data)
       bytes += n
       bytes_since_last_time += n
