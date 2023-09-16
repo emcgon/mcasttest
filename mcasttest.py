@@ -6,23 +6,6 @@ import argparse
 
 # Lots of helpful hints from https://svn.python.org/projects/python/trunk/Demo/sockets/mcast.py
 
-
-# def parse_address(addr, require_multicast=True):
-    # try:
-        # group = socket.inet_pton(socket.AF_INET, addr)
-        # group_af = socket.AF_INET
-        # if (require_multicast and (group[0] < 224) or (group[0] > 239)):    # Valid IPv4 are in the range 224.0.0.0 to 239.255.255.255
-            # raise OSError
-    # except OSError:
-        # # IPv4 failed...try IPv6
-        # group = socket.inet_pton(socket.AF_INET6, addr)
-        # group_af = socket.AF_INET6
-        # if (require_multicast and  (group[0] != 0xff)):      # Valid IPv6 multicast addresses are in the range ff00::/8
-            # raise OSError
-    # return(group, group_af)
-
-
-
 def pretty(n):
     suffixes = ("b/s", "Kb/s", "Mb/s", "Gb/s")
     i = 0
