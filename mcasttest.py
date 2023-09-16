@@ -6,7 +6,6 @@ import argparse
 
 # Lots of helpful hints from https://svn.python.org/projects/python/trunk/Demo/sockets/mcast.py
 
-
 def pretty(n):
     suffixes = ("b/s", "Kb/s", "Mb/s", "Gb/s")
     i = 0
@@ -20,19 +19,19 @@ parser = argparse.ArgumentParser(description='Join a multicast ground and listen
 parser.add_argument("group", action="store", help="Multicast group to join")
 parser.add_argument("--source", "-s", action="store", help="Joint a particular source (SSM)")
 parser.add_argument("--local", "-l", action="store", help="Local interface address (IPv4) or index (IPv6)")
-#parser.add_argument("--4", "-4", action="store_true", help="IPv4 only")
-#parser.add_argument("--6", "-6", action="store_true", help="IPv6 only")
 parser.add_argument("port", action="store", help="UDP port to listen on")
 args = parser.parse_args()
 
 try:
     group_info = socket.getaddrinfo(args.group, args.port, family=family)[0]
     group_bin = socket.inet_pton(group_info[0], group_info[4][0])
-    if (group_info[0] == socket.AF_INET):
+    address_family = group_info[0]
+    address_family_bin = struct.pack("!L", address_family)
+    if (address_family == socket.AF_INET):
         if ((group_bin[0] < 224) or (group_bin[0] > 239)):
             # IPv4 multicast addresses are in the range 224.0.0.0 to 239.255.255.255
             raise socket.gaierror
-        elif (group_info[0] == socket.AF_INET6):
+        elif (address_family == socket.AF_INET6):
             # IPv6 multicast addresses are in the range ff00::/8
             if (group_bin[0] != 0xff):
                 raise socket.gaierror
@@ -53,13 +52,13 @@ if (args.source):
         sys.exit(-1)
 
 # Determine the local interface address
-if (group_info[0] == socket.AF_INET):
+if (address_family == socket.AF_INET):
     local_bin = bytes([0,0,0,0])
 else:
     local_bin = struct.pack("@L", 0)    # In the IPv6 world, this is an interface index number
     
 if (args.local):
-    if (group_info[0] == socket.AF_INET):
+    if (address_family == socket.AF_INET):
         # In the IPv4 world, specify the interface by IP address
         try:
             local_info = socket.getaddrinfo(args.local, 0, family=socket.AF_INET)[0]
@@ -95,14 +94,14 @@ for (k, v) in extra_socket_attrs.items():
     if (not hasattr(socket, k)):
         setattr(socket, k, v)
 
-sock = socket.socket(group_info[0], socket.SOCK_DGRAM)
+sock = socket.socket(address_family, socket.SOCK_DGRAM)
 sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 sock.bind(('', int(args.port)))
 
 try:
     if (not args.source):
         # Not SSM
-        if (group_info[0] == socket.AF_INET):
+        if (address_family == socket.AF_INET):
             # IPv4
             mreq = group_bin + local_bin
             sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
@@ -112,7 +111,7 @@ try:
             sock.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_JOIN_GROUP, ipv6_mreq)
     else:
         # SSM join
-        if (group_info[0] == socket.AF_INET):
+        if (address_family == socket.AF_INET):
             # IPv4
             mreq = group_bin + local_bin + source_bin 
             sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_SOURCE_MEMBERSHIP, mreq)
