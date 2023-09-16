@@ -6,6 +6,7 @@ import argparse
 
 # Lots of helpful hints from https://svn.python.org/projects/python/trunk/Demo/sockets/mcast.py
 
+
 def pretty(n):
     suffixes = ("b/s", "Kb/s", "Mb/s", "Gb/s")
     i = 0
@@ -19,17 +20,14 @@ parser = argparse.ArgumentParser(description='Join a multicast ground and listen
 parser.add_argument("group", action="store", help="Multicast group to join")
 parser.add_argument("--source", "-s", action="store", help="Joint a particular source (SSM)")
 parser.add_argument("--local", "-l", action="store", help="Local interface address (IPv4) or index (IPv6)")
-parser.add_argument("--4", "-4", action="store_true", help="IPv4 only")
-parser.add_argument("--6", "-6", action="store_true", help="IPv6 only")
+#parser.add_argument("--4", "-4", action="store_true", help="IPv4 only")
+#parser.add_argument("--6", "-6", action="store_true", help="IPv6 only")
 parser.add_argument("port", action="store", help="UDP port to listen on")
 args = parser.parse_args()
-
-print(args)
 
 try:
     group_info = socket.getaddrinfo(args.group, args.port, family=family)[0]
     group_bin = socket.inet_pton(group_info[0], group_info[4][0])
-    print("group_info=", group_info, "group_bin=",  group_bin)
     if (group_info[0] == socket.AF_INET):
         if ((group_bin[0] < 224) or (group_bin[0] > 239)):
             # IPv4 multicast addresses are in the range 224.0.0.0 to 239.255.255.255
